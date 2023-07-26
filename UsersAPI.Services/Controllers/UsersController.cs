@@ -1,22 +1,33 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using UsersAPI.Application.Dtos.Requests;
+using UsersAPI.Application.Dtos.Responses;
+using UsersAPI.Application.Interfaces.Application;
 
 namespace UsersAPI.Services.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "USER_ROLE")]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
     {
+        private readonly IUserAppService? _userAppService;
+
+        public UsersController(IUserAppService? userAppService)
+        {
+            _userAppService = userAppService;
+        }
+
         /// <summary>
         /// Criar conta de usuário
         /// </summary>
         [AllowAnonymous]
         [HttpPost]
-        public IActionResult Add()
+        [ProducesResponseType(typeof(UserResponseDto), 201)]
+        public IActionResult Add([FromBody] UserAddRequestDto dto)
         {
-            return Ok();
+            return StatusCode(201, _userAppService?.Add(dto));
         }
 
         /// <summary>
@@ -43,6 +54,9 @@ namespace UsersAPI.Services.Controllers
         [HttpGet]
         public IActionResult Get()
         {
+            //capturando conteudo do Token
+            var auth = User.Identity.Name;
+
             return Ok();
         }
     }
